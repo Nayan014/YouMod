@@ -1641,9 +1641,10 @@ static void YouModPresentMenu(YTPlayerViewController *player, NSArray <YouModMen
         NSString *status = json[@"status"];
         
         if ([status isEqualToString:@"done"]) {
-            NSString *singleFileName = json[@"filename"];
+            NSString *rawFileName = [json[@"filename"] isKindOfClass:[NSString class]] ? [json[@"filename"] lastPathComponent] : nil;
+            NSString *singleFileName = YouModSanitizedFileName(rawFileName);
             
-            if (!singleFileName || singleFileName.length == 0) {
+            if (!singleFileName || singleFileName.length == 0 || [singleFileName isEqualToString:@"YouTube Video"]) {
                 singleFileName = isAudio ? @"downloaded_file.mp3" : @"downloaded_file.mp4";
             }
             
@@ -1667,7 +1668,8 @@ static void YouModPresentMenu(YTPlayerViewController *player, NSArray <YouModMen
     
     self.downloadCompletionBlock = completionBlock;
     
-    NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:filename];
+    NSString *safeName = YouModSanitizedFileName([filename lastPathComponent]);
+    NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:safeName];
     self.destinationURL = [NSURL fileURLWithPath:tempPath];
     
     self.finishedCurrentFile = NO;

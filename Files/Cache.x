@@ -5,7 +5,16 @@
 %new
 - (void)YouModAutoClearCache {
     NSString *cachePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
-    [[NSFileManager defaultManager] removeItemAtPath:cachePath error:nil];
+    if (!cachePath) return;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:cachePath error:&error];
+    if (!error && contents) {
+        for (NSString *item in contents) {
+            NSString *itemPath = [cachePath stringByAppendingPathComponent:item];
+            [fileManager removeItemAtPath:itemPath error:nil];
+        }
+    }
 }
 - (BOOL)application:(id)application didFinishLaunchingWithOptions:(id)launchOptions {
     BOOL result = %orig;

@@ -404,8 +404,10 @@ jobs:
           
       - name: Download Custom App Icon
         if: ${{ inputs.icon_url != '' }}
+        env:
+          ICON_URL: ${{ inputs.icon_url }}
         run: |
-          curl -sL "${{ inputs.icon_url }}" -o custom_icon.png
+          curl -sL "$ICON_URL" -o custom_icon.png
           if [ -s custom_icon.png ]; then
             echo "Custom icon downloaded successfully."
           else
@@ -414,12 +416,15 @@ jobs:
           fi
 
       - name: Inject Tweaks Into IPA
+        env:
+          DISPLAY_NAME: ${{ inputs.display_name }}
+          BUNDLE_ID: ${{ inputs.bundle_id }}
         run: |
           icon_arg=""
           if [ -f custom_icon.png ]; then
             icon_arg="-k custom_icon.png"
           fi
-          cyan -i youtube.ipa -o YouMod_${{ env.YT_VERSION }}_v${{ env.YOUMOD_VERSION }}.ipa -uwef *.deb -n "${{ inputs.display_name }}" -b ${{ inputs.bundle_id }} $icon_arg
+          cyan -i youtube.ipa -o YouMod_${{ env.YT_VERSION }}_v${{ env.YOUMOD_VERSION }}.ipa -uwef *.deb -n "$DISPLAY_NAME" -b "$BUNDLE_ID" $icon_arg
 
       - name: Create a Draft Release
         uses: softprops/action-gh-release@v3
